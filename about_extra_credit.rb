@@ -79,7 +79,7 @@ class Game
 		@players = []
 		@number_of_dices = number_of_dices
 	end
-	
+
 	def display_scoreboard(players)
 		puts "\n\n\tScoreboard\n "
 		players.each do |player|
@@ -154,27 +154,19 @@ class Game
 		players.each do |player|
 			if player.score < 3000
 				flag,round_score,left_scoring = turn(player,@number_of_dices,@number_of_dices,dices)
-				if flag
-					next
-				end
+				next if flag
 				if player.score+round_score >= 300
 					print "\nContinue(y/n)?: "
 					choice = gets.chomp
 					while choice.downcase == "y" && left_scoring > 0
 						flag,round_score_t,left_scoring = turn(player,@number_of_dices,left_scoring,dices)
-						if(flag)
-							break
-						end
+						break if flag
 						round_score+=round_score_t
 						print "\nContinue(y/n)?: "
 						choice = gets.chomp
 					end
-					if !flag
-						player.score +=round_score
-					end
-					if(player.score >= 3000)
-						return true
-					end
+					player.score +=round_score if !flag
+					return true if(player.score >= 3000)
 				end
 			end
 		end
