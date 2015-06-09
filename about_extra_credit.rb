@@ -8,6 +8,8 @@
 # is a free form assignment, so approach it however you desire.
 $LOAD_PATH << File.dirname(__FILE__)
 require 'about_dice_project'
+
+## Class to give color in game ignore
 module Color
     #shamelessly stolen (and modified) from redgreen
     COLORS = {
@@ -56,6 +58,9 @@ module Color
       defined? Win32::Console
     end
   end
+
+#Class for player
+
 class Player
 	attr_reader :name, :score
 	attr_writer :score
@@ -65,6 +70,8 @@ class Player
 	end
 end
 
+# Game Class
+
 class Game
 	attr_reader :number_of_dices
 	def initialize(number_of_dices)
@@ -72,7 +79,7 @@ class Game
 		@players = []
 		@number_of_dices = number_of_dices
 	end
-
+	
 	def display_scoreboard(players)
 		puts "\n\n\tScoreboard\n "
 		players.each do |player|
@@ -117,57 +124,54 @@ class Game
 		puts Color.green("\n\t\t\t Congratulations #{winner} You Won!!!!!\n\n")
 	end
 
+	def turn (player,number_of_dices,left_scoring,dices)
+		flag=false
+		print Color.magenta("\nRolling dice for Player #{player.name} ")
+		number_of_dices.times do
+			sleep 0.2
+			print Color.red('. ')
+		end
+		round_score_t,left_scoring = score(x = dices.roll(left_scoring))
+		if left_scoring == 0
+			puts Color.red("\n\n\t Nice roll")
+			left_scoring=@number_of_dices
+		end
+		if round_score_t == 0
+			left_scoring = 0
+			round_score = 0
+			puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
+			puts "\n\n\t ### No Scoring Dice #{player.name} lost this turn! ###"
+			return true,round_score,left_scoring
+		end
+		round_score = round_score_t
+		puts "\n\nDices rolled: #{x}\nScored: #{round_score}\nScoring Dices left: #{left_scoring}"
+		return false,round_score,left_scoring
+	end
+
 	def play_round(players)
 		dices = DiceSet.new
 		round_players = players
 		players.each do |player|
 			if player.score < 3000
-				print Color.magenta("\nRolling dice for Player #{player.name} ")
-				@number_of_dices.times do
-					sleep 0.2
-					print Color.red('. ')
-				end
-				round_score_t,left_scoring = score(x = dices.roll(number_of_dices))
-				if left_scoring == 0
-					puts Color.red("\n\t Nice roll \n")
-					left_scoring=@number_of_dices
-				end
-				if round_score_t == 0
-					left_scoring = 0
-					round_score = 0
-					puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
-					puts "\n\n\t ### No Scoring Dice #{player.name} lost this turn! ###"
+				flag,round_score,left_scoring = turn(player,@number_of_dices,@number_of_dices,dices)
+				if flag
 					next
 				end
-				round_score = round_score_t
-				puts "\n\nDices rolled: #{x}\nScored: #{round_score}\nScoring Dices left: #{left_scoring}"
 				if player.score+round_score >= 300
 					print "\nContinue(y/n)?: "
 					choice = gets.chomp
 					while choice.downcase == "y" && left_scoring > 0
-						print Color.magenta("\nRolling dice for Player #{player.name} ")
-						left_scoring.times do
-							sleep 0.2
-							print Color.red('. ')
-						end
-						round_score_t,left_scoring = score(x = dices.roll(left_scoring))
-						if left_scoring == 0
-							puts Color.red("\n\t Nice roll \n")
-							left_scoring=@number_of_dices
-						end
-						if round_score_t == 0
-							left_scoring = 0
-							round_score = 0
-							puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
-							puts "\n\n\t ### No Scoring Dice #{player.name} lost this turn! ###"
+						flag,round_score_t,left_scoring = turn(player,@number_of_dices,left_scoring,dices)
+						if(flag)
 							break
 						end
-						puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
 						round_score+=round_score_t
 						print "\nContinue(y/n)?: "
 						choice = gets.chomp
 					end
-					player.score +=round_score
+					if !flag
+						player.score +=round_score
+					end
 					if(player.score >= 3000)
 						return true
 					end
@@ -176,6 +180,7 @@ class Game
 		end
 		false
 	end
+
 	def score(dice)
 	  # You need to write this method
 	  score = 0
@@ -205,6 +210,7 @@ class Game
 	  end
 	  return [score,left_scoring]
 	end
+
 end
 
 game = Game.new(5)
