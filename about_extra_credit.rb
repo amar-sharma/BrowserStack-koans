@@ -66,21 +66,23 @@ class Player
 end
 
 class Game
-	def initialize()
+	attr_reader :number_of_dices
+	def initialize(number_of_dices)
 		@number_of_players = 0
 		@players = []
+		@number_of_dices = number_of_dices
 	end
 
 	def display_scoreboard(players)
-		puts "Scoreboard: "
+		puts "\n\n\tScoreboard\n "
 		players.each do |player|
-			puts " Player #{player.name}: #{player.score}"
+			puts Color.red("\n Player #{player.name}:\t#{player.score}")
 		end
 	end
 
 	def start_game()
-		puts '**** Welcome to GREED ****'
-		print 'Enter Number of Players: '
+		puts Color.red("\n\t\t**** Welcome to GREED ****\n")
+		print "\n Enter Number of Players: "
 		number = gets.chomp
 		@number_of_players = number.to_i
 		@number_of_players.times do |i|
@@ -120,17 +122,21 @@ class Game
 		round_players = players
 		players.each do |player|
 			if player.score < 3000
-				print Color.cyan("\nRolling dice for Player #{player.name}")
-				round_score,left_scoring = score(x = dices.roll(6))
+				print Color.magenta("\nRolling dice for Player #{player.name} ")
+				@number_of_dices.times do
+					sleep 0.2
+					print Color.red('. ')
+				end
+				round_score,left_scoring = score(x = dices.roll(number_of_dices))
 				puts "\nDices rolled: #{x}\nScored: #{round_score}\nScoring Dices left: #{left_scoring}"
 				if player.score+round_score >= 300
-					print "Wanna continue(y/n)?: "
+					print "Continue(y/n)?: "
 					choice = gets.chomp
 					while choice.downcase == "y" && left_scoring > 0
-						print Color.cyan("\nRolling dice for Player #{player.name}")
+						print Color.magenta("\nRolling dice for Player #{player.name}")
 						round_score_t,left_scoring = score(x = dices.roll(left_scoring))
 						if left_scoring == 0
-							left_scoring=5
+							left_scoring=@number_of_dices
 						end
 						if round_score_t == 0
 							left_scoring = 0
@@ -141,7 +147,7 @@ class Game
 						end
 						puts "\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
 						round_score+=round_score_t
-						print "Wanna continue(y/n)?: "
+						print "Continue(y/n)?: "
 						choice = gets.chomp
 					end
 					player.score +=round_score
@@ -184,5 +190,5 @@ class Game
 	end
 end
 
-game = Game.new
+game = Game.new(5)
 game.start_game
