@@ -86,7 +86,7 @@ class Game
 		number = gets.chomp
 		@number_of_players = number.to_i
 		@number_of_players.times do |i|
-			print "Enter name of Player \##{i+1}: "
+			print " Enter name of Player \##{i+1}: "
 			name = gets.chomp
 			@players.push << Player.new(name) 
 		end
@@ -127,27 +127,44 @@ class Game
 					sleep 0.2
 					print Color.red('. ')
 				end
-				round_score,left_scoring = score(x = dices.roll(number_of_dices))
-				puts "\nDices rolled: #{x}\nScored: #{round_score}\nScoring Dices left: #{left_scoring}"
+				round_score_t,left_scoring = score(x = dices.roll(number_of_dices))
+				if left_scoring == 0
+					puts Color.red("\n\t Nice roll \n")
+					left_scoring=@number_of_dices
+				end
+				if round_score_t == 0
+					left_scoring = 0
+					round_score = 0
+					puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
+					puts "\n\n\t ### No Scoring Dice #{player.name} lost this turn! ###"
+					next
+				end
+				round_score = round_score_t
+				puts "\n\nDices rolled: #{x}\nScored: #{round_score}\nScoring Dices left: #{left_scoring}"
 				if player.score+round_score >= 300
-					print "Continue(y/n)?: "
+					print "\nContinue(y/n)?: "
 					choice = gets.chomp
 					while choice.downcase == "y" && left_scoring > 0
-						print Color.magenta("\nRolling dice for Player #{player.name}")
+						print Color.magenta("\nRolling dice for Player #{player.name} ")
+						left_scoring.times do
+							sleep 0.2
+							print Color.red('. ')
+						end
 						round_score_t,left_scoring = score(x = dices.roll(left_scoring))
 						if left_scoring == 0
+							puts Color.red("\n\t Nice roll \n")
 							left_scoring=@number_of_dices
 						end
 						if round_score_t == 0
 							left_scoring = 0
 							round_score = 0
-							puts "\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
+							puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
 							puts "\n\n\t ### No Scoring Dice #{player.name} lost this turn! ###"
 							break
 						end
-						puts "\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
+						puts "\n\nDices rolled: #{x}\nScored: #{round_score_t}\nScoring Dices left: #{left_scoring}"
 						round_score+=round_score_t
-						print "Continue(y/n)?: "
+						print "\nContinue(y/n)?: "
 						choice = gets.chomp
 					end
 					player.score +=round_score
